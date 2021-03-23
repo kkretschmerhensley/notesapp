@@ -30,7 +30,7 @@ const reducer = (state, action) => {
       return { ...state, loading: false, error: true };
 
     case 'ADD_NOTE':
-      return { ...state, notes: [action.note, ...state.notes] };
+      return { ...state, notes: [...state.notes, action.note] };
 
     case 'RESET_FORM':
       return { ...state, form: initialState.form };
