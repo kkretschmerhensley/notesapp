@@ -9,7 +9,10 @@ import 'antd/dist/antd.css';
 
 import { listNotes } from './graphql/queries';
 import { v4 as uuid } from 'uuid';
-import { createNote as CreateNote } from './graphql/mutations';
+import {
+  createNote as CreateNote,
+  deleteNote as DeleteNote
+} from './graphql/mutations';
 
 const CLIENT_ID = uuid();
 
@@ -125,9 +128,34 @@ const App = () => {
     });
   };
 
+  const deleteNote = async (noteToDelete) => {
+    // optimistically update state with the note removed
+    dispatch({
+      type: "SET_NOTES",
+      notes: state.notes.filter(x => x != noteToDelete)
+    });
+
+    // call the backend to delete the note
+    try {
+      await API.graphql({
+        query: DeleteNote,
+        variables: { input: {id: noteToDelete.id} }
+      });
+    }
+
+    catch (err) {
+      console.error(err);
+    }
+  };
+
   const renderItem = (item) => {
     return (
-      <List.Item style={styles.item}>
+      <List.Item
+        style={styles.item}
+        actions={[
+          <p style={styles.p} onClick={() => deleteNote(item)}>Delete</p>
+        ]}
+      >
         <List.Item.Meta
           title={item.name}
           description={item.description}
